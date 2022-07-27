@@ -1,0 +1,27 @@
+{
+  "name": "filpulse-api",
+  "version": "1.0.0",
+  "description": "Dev Dashboard API",
+  "main": "index.js",
+  "scripts": {
+    "start": "env-cmd node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CrossChainLabs/filpulse-api.git"
+  },
+  "author": "CrossChain Labs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CrossChainLabs/filpulse-api/issues"
+  },
+  "homepage": "https://github.com/CrossChainLabs/filpulse-api#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "env-cmd": "^10.1.0",
+    "express": "^4.17.2",
+    "pg": "^8.7.1",
+    "time-stamp": "^2.2.0"
+  }
+}
