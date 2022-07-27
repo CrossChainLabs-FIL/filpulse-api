@@ -44,10 +44,6 @@ const commits = async function (req, res, next) {
     await  get('*', 'commits_view', req, res, next, 'commits');
 };
 
-const issues = async function (req, res, next) {
-    await  get('*', 'issues_view', req, res, next, 'issues', true);
-};
-
 const active_contributors = async function (req, res, next) {
     await  get('*', 'active_contributors_view', req, res, next, 'active_contributors');
 };
@@ -61,7 +57,6 @@ module.exports = {
     overview,
     top_contributors,
     commits,
-    issues,
     active_contributors,
     recent_commits
 }

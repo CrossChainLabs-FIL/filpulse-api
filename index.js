@@ -4,7 +4,6 @@ const {
     overview,
     top_contributors,
     commits,
-    issues,
     active_contributors,
     recent_commits
 } = require('./api');
@@ -19,7 +18,6 @@ app.use(express.json());
 app.get("/overview", overview);
 app.get("/top_contributors", top_contributors);
 app.get("/commits", commits);
-app.get("/issues", issues);
 app.get("/active_contributors", active_contributors);
 app.get("/recent_commits", recent_commits);
 
