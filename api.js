@@ -14,7 +14,7 @@ const get = async function (query, view, req, res, next, log, single_line = fals
         var result = await pool.query(`SELECT ${query} FROM ${view};`);
 
         if (result.rows.length) {
-            INFO(`GET[${log}]: ${JSON.stringify(result.rows)}`);
+            INFO(`GET[${log}]: ${JSON.stringify(result.rows.length)} results`);
 
             if (single_line) {
                 res.json(result.rows[0]);
