@@ -9,9 +9,15 @@ function error_response(code, msg, res) {
 }
 
 // GET
-const get = async function (query, view, req, res, next, log, single_line = false) {
+const get = async function (query, view, predicate, req, res, next, log, single_line) {
     try {
-        var result = await pool.query(`SELECT ${query} FROM ${view};`);
+        var result;
+        if (predicate) {
+            result = await pool.query(`SELECT ${query} FROM ${view} ${predicate};`);
+        } else
+        {
+            result = await pool.query(`SELECT ${query} FROM ${view};`);
+        }
 
         if (result.rows.length) {
             INFO(`GET[${log}]: ${JSON.stringify(result.rows.length)} results`);
@@ -33,23 +39,23 @@ const get = async function (query, view, req, res, next, log, single_line = fals
 };
 
 const overview = async function (req, res, next) {
-    await  get('*', 'overview_view', req, res, next, 'overview', true);
+    await  get('*', 'overview_view', '', req, res, next, 'overview', true);
 };
 
 const top_contributors = async function (req, res, next) {
-    await  get('*', 'top_contributors_view', req, res, next, 'top_contributors');
+    await  get('*', 'top_contributors_view', 'ORDER BY contributions DESC', req, res, next, 'top_contributors', false);
 };
 
 const commits = async function (req, res, next) {
-    await  get('*', 'commits_view', req, res, next, 'commits');
+    await  get('*', 'commits_view', 'ORDER BY commit_month', req, res, next, 'commits', false);
 };
 
 const active_contributors = async function (req, res, next) {
-    await  get('*', 'active_contributors_view', req, res, next, 'active_contributors');
+    await  get('*', 'active_contributors_view', 'ORDER BY month', req, res, next, 'active_contributors', false);
 };
 
 const recent_commits = async function (req, res, next) {
-    await  get('*', 'recent_commits_view', req, res, next, 'recent_commits');
+    await  get('*', 'recent_commits_view', 'ORDER BY commit_date DESC', req, res, next, 'recent_commits', false);
 };
 
 
