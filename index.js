@@ -5,7 +5,8 @@ const {
     top_contributors,
     commits,
     active_contributors,
-    recent_commits
+    tab_commits,
+    tab_commits_filter_contributor
 } = require('./api');
 
 var express = require("express");
@@ -19,7 +20,8 @@ app.get("/overview", overview);
 app.get("/top_contributors", top_contributors);
 app.get("/commits", commits);
 app.get("/active_contributors", active_contributors);
-app.get("/recent_commits", recent_commits);
+app.get("/tab_commits", tab_commits);
+app.get("/tab_commits/filter/contributor", tab_commits_filter_contributor);
 
 
 app.listen(config.api.port, () => {
