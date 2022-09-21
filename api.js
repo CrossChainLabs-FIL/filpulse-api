@@ -132,7 +132,11 @@ const tab_commits = async function (req, res, next) {
 };
 
 const tab_commits_filter_project = async function (req, res, next) {
-    await  get('dev_name as contributor', 'tab_commits_view', 'ORDER BY commit_date DESC', req, res, next, 'tab_commits_filter_contributor');
+    if (req?.query?.search) {
+        await  get('repo, organisation', 'projects_view', `WHERE repo ~* '${req.query.search}' OR organisation ~* '${req.query.search}'`, req, res, next, 'tab_commits_filter_contributor');
+    } else {
+        await  get('repo, organisation', 'projects_view', '', req, res, next, 'tab_commits_filter_contributor');
+    }
 };
 
 const tab_commits_filter_contributor = async function (req, res, next) {

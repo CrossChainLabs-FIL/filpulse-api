@@ -6,6 +6,7 @@ const {
     commits,
     active_contributors,
     tab_commits,
+    tab_commits_filter_project,
     tab_commits_filter_contributor
 } = require('./api');
 
@@ -22,6 +23,7 @@ app.get("/commits", commits);
 app.get("/active_contributors", active_contributors);
 app.get("/tab_commits", tab_commits);
 app.get("/tab_commits/filter/contributor", tab_commits_filter_contributor);
+app.get("/tab_commits/filter/project", tab_commits_filter_project);
 
 
 app.listen(config.api.port, () => {
