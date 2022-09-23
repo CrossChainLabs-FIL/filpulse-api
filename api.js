@@ -93,6 +93,19 @@ const tab_commits = async function (req, res, next) {
     let repo = req?.query?.repo;
     let organisation = req?.query?.organisation;
     let contributor = req?.query?.contributor;
+    let sortBy = req?.query?.sortBy;
+    let sortType = req?.query?.sortType;
+
+    const sortColumns = ['commit_date'];
+    const sortMode = ['asc', 'desc'];
+
+    if (!sortBy || !sortColumns.includes(sortBy)) {
+        sortBy = 'commit_date';
+    }
+
+    if (!sortType || !sortMode.includes(sortType)) {
+        sortType = 'desc';
+    }
 
 
     if (repo && organisation) {
@@ -120,11 +133,11 @@ const tab_commits = async function (req, res, next) {
                      organisation ~* '${req.query.search}' OR \
                      message ~* '${req.query.search}' OR \
                      commit_hash ~* '${req.query.search}' \
-                     ORDER BY commit_date DESC`
+                     ORDER BY ${sortBy} ${sortType}`
     }
 
     if (!predicate) {
-        predicate = 'ORDER BY commit_date DESC';
+        predicate = `ORDER BY ${sortBy} ${sortType}`;
     }
             
      await  get('*', 'tab_commits_view', predicate, req, res, next, 'tab_commits', false);
@@ -152,7 +165,19 @@ const tab_contributors = async function (req, res, next) {
     let repo = req?.query?.repo;
     let organisation = req?.query?.organisation;
     let contributor = req?.query?.contributor;
+    let sortBy = req?.query?.sortBy;
+    let sortType = req?.query?.sortType;
 
+    const sortColumns = ['contributions', 'open_issues', 'closed_issues', 'open_prs', 'merged_prs'];
+    const sortMode = ['asc', 'desc'];
+
+    if (!sortBy || !sortColumns.includes(sortBy)) {
+        sortBy = 'contributions';
+    }
+
+    if (!sortType || !sortMode.includes(sortType)) {
+        sortType = 'desc';
+    }
 
     if (repo && organisation) {
         predicate = `WHERE repo = '${repo}' AND organisation = '${organisation}'`;
@@ -177,11 +202,11 @@ const tab_contributors = async function (req, res, next) {
         predicate +=`dev_name ~* '${req.query.search}' OR \
                      repo ~* '${req.query.search}' OR \
                      organisation ~* '${req.query.search}' \
-                     ORDER BY contributions DESC`
+                     ORDER BY ${sortBy} ${sortType}`
     }
 
     if (!predicate) {
-        predicate = 'ORDER BY contributions DESC';
+        predicate = `ORDER BY ${sortBy} ${sortType}`;
     }
             
      await  get('*', 'tab_contributors_view', predicate, req, res, next, 'tab_contributors', false);
