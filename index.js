@@ -7,7 +7,10 @@ const {
     active_contributors,
     tab_commits,
     tab_commits_filter_project,
-    tab_commits_filter_contributor
+    tab_commits_filter_contributor,
+    tab_contributors,
+    tab_contributors_filter_contributor,
+    tab_contributors_filter_project
 } = require('./api');
 
 var express = require("express");
@@ -24,6 +27,9 @@ app.get("/active_contributors", active_contributors);
 app.get("/tab_commits", tab_commits);
 app.get("/tab_commits/filter/contributor", tab_commits_filter_contributor);
 app.get("/tab_commits/filter/project", tab_commits_filter_project);
+app.get("/tab_contributors", tab_contributors);
+app.get("/tab_contributors/filter/contributor", tab_contributors_filter_contributor);
+app.get("/tab_contributors/filter/project", tab_contributors_filter_project);
 
 
 app.listen(config.api.port, () => {

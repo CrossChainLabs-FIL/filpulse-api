@@ -147,6 +147,63 @@ const tab_commits_filter_contributor = async function (req, res, next) {
     }
 };
 
+const tab_contributors = async function (req, res, next) {
+    let predicate = undefined;
+    let repo = req?.query?.repo;
+    let organisation = req?.query?.organisation;
+    let contributor = req?.query?.contributor;
+
+
+    if (repo && organisation) {
+        predicate = `WHERE repo = '${repo}' AND organisation = '${organisation}'`;
+    }
+
+    if (contributor) {
+        if (!predicate) {
+            predicate = `WHERE dev_name = '${contributor}'`;
+        } else {
+            predicate += `AND dev_name = '${contributor}'`
+        }
+    }
+
+
+    if (req?.query?.search) {
+        if (!predicate) {
+            predicate = 'WHERE ';
+        } else {
+            predicate += 'OR ';
+        }
+        
+        predicate +=`dev_name ~* '${req.query.search}' OR \
+                     repo ~* '${req.query.search}' OR \
+                     organisation ~* '${req.query.search}' \
+                     ORDER BY contributions DESC`
+    }
+
+    if (!predicate) {
+        predicate = 'ORDER BY contributions DESC';
+    }
+            
+     await  get('*', 'tab_contributors_view', predicate, req, res, next, 'tab_contributors', false);
+
+};
+
+const tab_contributors_filter_project = async function (req, res, next) {
+    if (req?.query?.search) {
+        await  get('repo, organisation', 'projects_view', `WHERE repo ~* '${req.query.search}' OR organisation ~* '${req.query.search}'`, req, res, next, 'tab_contributors_filter_project');
+    } else {
+        await  get('repo, organisation', 'projects_view', '', req, res, next, 'tab_contributors_filter_project');
+    }
+};
+
+const tab_contributors_filter_contributor = async function (req, res, next) {
+    if (req?.query?.search) {
+        await  get('dev_name as contributor', 'devs_view', `WHERE dev_name ~* '${req.query.search}'`, req, res, next, 'tab_contributors_filter_contributor', false);
+    } else {
+        await  get('dev_name as contributor', 'devs_view', '', req, res, next, 'tab_contributors_filter_contributor', false);
+    }
+};
+
 module.exports = {
     overview,
     top_contributors,
@@ -154,5 +211,8 @@ module.exports = {
     active_contributors,
     tab_commits,
     tab_commits_filter_project,
-    tab_commits_filter_contributor
+    tab_commits_filter_contributor,
+    tab_contributors,
+    tab_contributors_filter_contributor,
+    tab_contributors_filter_project
 }
