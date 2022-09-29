@@ -89,7 +89,7 @@ const active_contributors = async function (req, res, next) {
 };
 
 const tab_commits = async function (req, res, next) {
-    let predicate = undefined;
+    let predicate = '';
     let repo = req?.query?.repo;
     let organisation = req?.query?.organisation;
     let contributor = req?.query?.contributor;
@@ -109,14 +109,14 @@ const tab_commits = async function (req, res, next) {
 
 
     if (repo && organisation) {
-        predicate = `WHERE repo = '${repo}' AND organisation = '${organisation}'`;
+        predicate = `WHERE repo = '${repo}' AND organisation = '${organisation}' `;
     }
 
     if (contributor) {
         if (!predicate) {
-            predicate = `WHERE dev_name = '${contributor}'`;
+            predicate = `WHERE dev_name = '${contributor}' `;
         } else {
-            predicate += `AND dev_name = '${contributor}'`
+            predicate += `AND dev_name = '${contributor}' `;
         }
     }
 
@@ -128,18 +128,16 @@ const tab_commits = async function (req, res, next) {
             predicate += 'OR ';
         }
         
-        predicate +=`dev_name ~* '${req.query.search}' OR \
-                     repo ~* '${req.query.search}' OR \
-                     organisation ~* '${req.query.search}' OR \
-                     message ~* '${req.query.search}' OR \
-                     commit_hash ~* '${req.query.search}' \
-                     ORDER BY ${sortBy} ${sortType}`
+        predicate +=`dev_name ~* '${req.query.search}' OR 
+                     repo ~* '${req.query.search}' OR 
+                     organisation ~* '${req.query.search}' OR 
+                     message ~* '${req.query.search}' OR 
+                     commit_hash ~* '${req.query.search}' `;
     }
 
-    if (!predicate) {
-        predicate = `ORDER BY ${sortBy} ${sortType}`;
-    }
-            
+
+    predicate += `ORDER BY ${sortBy} ${sortType}`;
+   
      await  get('*', 'tab_commits_view', predicate, req, res, next, 'tab_commits', false);
 
 };
@@ -161,7 +159,7 @@ const tab_commits_filter_contributor = async function (req, res, next) {
 };
 
 const tab_contributors = async function (req, res, next) {
-    let predicate = undefined;
+    let predicate = '';
     let repo = req?.query?.repo;
     let organisation = req?.query?.organisation;
     let contributor = req?.query?.contributor;
@@ -185,12 +183,11 @@ const tab_contributors = async function (req, res, next) {
 
     if (contributor) {
         if (!predicate) {
-            predicate = `WHERE dev_name = '${contributor}'`;
+            predicate = `WHERE dev_name = '${contributor}' `;
         } else {
-            predicate += `AND dev_name = '${contributor}'`
+            predicate += `AND dev_name = '${contributor}' `;
         }
     }
-
 
     if (req?.query?.search) {
         if (!predicate) {
@@ -198,18 +195,16 @@ const tab_contributors = async function (req, res, next) {
         } else {
             predicate += 'OR ';
         }
-        
-        predicate +=`dev_name ~* '${req.query.search}' OR \
-                     repo ~* '${req.query.search}' OR \
-                     organisation ~* '${req.query.search}' \
-                     ORDER BY ${sortBy} ${sortType}`
+
+        predicate += `dev_name ~* '${req.query.search}' OR 
+                     repo ~* '${req.query.search}' OR 
+                     organisation ~* '${req.query.search}' `;
     }
 
-    if (!predicate) {
-        predicate = `ORDER BY ${sortBy} ${sortType}`;
-    }
-            
-     await  get('*', 'tab_contributors_view', predicate, req, res, next, 'tab_contributors', false);
+    predicate += `ORDER BY ${sortBy} ${sortType}`;
+
+
+    await get('*', 'tab_contributors_view', predicate, req, res, next, 'tab_contributors', false);
 
 };
 
