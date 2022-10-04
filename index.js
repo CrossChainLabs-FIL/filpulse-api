@@ -14,6 +14,9 @@ const {
     tab_prs,
     tab_prs_filter_project,
     tab_prs_filter_contributor,
+    tab_issues,
+    tab_issues_filter_project,
+    tab_issues_filter_contributor,
 } = require('./api');
 
 var express = require("express");
@@ -42,6 +45,9 @@ app.get("/tab_contributors/filter/contributor", tab_contributors_filter_contribu
 app.get("/tab_prs", tab_prs);
 app.get("/tab_prs/filter/project", tab_prs_filter_project);
 app.get("/tab_prs/filter/contributor", tab_prs_filter_contributor);
+app.get("/tab_issues", tab_issues);
+app.get("/tab_issues/filter/project", tab_issues_filter_project);
+app.get("/tab_issues/filter/contributor", tab_issues_filter_contributor);
 
 
 app.listen(config.api.port, () => {

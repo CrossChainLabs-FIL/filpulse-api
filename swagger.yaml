@@ -358,9 +358,6 @@ paths:
                     type: string
                   updated_at:
                     type: boolean
-                  pr_state:
-                    type: string
-
 
   /tab_prs/filter/project:
    get:
@@ -388,6 +385,117 @@ paths:
    get:
       summary: "Tab PRs filter contributor"
       operationId: "tab_prs_filter_contributor"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  contributor:
+                    type: string
+                  avatar_url:
+                    type: string
+
+  /tab_issues:
+   get:
+      summary: "Tab Issues"
+      operationId: "tab_issues"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      - name: "repo"
+        in: "query"
+        description: "Repo"
+        required: false
+        type: string
+      - name: "organisation"
+        in: "query"
+        description: "Organisation"
+        required: false
+        type: string
+      - name: "sortBy"
+        in: "query"
+        description: "Sort by"
+        required: false
+        type: string
+        enum:
+          - "updated_at"
+      - name: "sortType"
+        in: "query"
+        description: "Sort type"
+        required: false
+        type: string
+        enum:
+          - "asc"
+          - "desc"
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  issue_number:
+                    type: integer
+                  title:
+                    type: string
+                  html_url:
+                    type: string
+                  dev_name:
+                    type: string
+                  avatar_url:
+                    type: string
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+                  issue_state:
+                    type: string
+                  assignees:
+                    type: array
+                  updated_at:
+                    type: boolean
+
+
+
+  /tab_issues/filter/project:
+   get:
+      summary: "Tab Issues filter project"
+      operationId: "tab_issues_filter_project"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+  /tab_issues/filter/contributor:
+   get:
+      summary: "Tab Issues filter contributor"
+      operationId: "tab_issues_filter_contributor"
       produces: 
       - "application/json"
       parameters:

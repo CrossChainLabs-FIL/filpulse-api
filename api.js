@@ -291,6 +291,73 @@ const tab_prs_filter_contributor = async function (req, res, next) {
     }
 };
 
+const tab_issues = async function (req, res, next) {
+    let predicate = '';
+    let repo = req?.query?.repo;
+    let organisation = req?.query?.organisation;
+    let contributor = req?.query?.contributor;
+    let sortBy = req?.query?.sortBy;
+    let sortType = req?.query?.sortType;
+
+    const sortColumns = ['updated_at'];
+    const sortMode = ['asc', 'desc'];
+
+    if (!sortBy || !sortColumns.includes(sortBy)) {
+        sortBy = 'updated_at';
+    }
+
+    if (!sortType || !sortMode.includes(sortType)) {
+        sortType = 'desc';
+    }
+
+    if (repo && organisation) {
+        predicate = `WHERE repo = '${repo}' AND organisation = '${organisation}'`;
+    }
+
+    if (contributor) {
+        if (!predicate) {
+            predicate = `WHERE dev_name = '${contributor}' `;
+        } else {
+            predicate += `AND dev_name = '${contributor}' `;
+        }
+    }
+
+    if (req?.query?.search) {
+        if (!predicate) {
+            predicate = 'WHERE ';
+        } else {
+            predicate += 'OR ';
+        }
+
+        predicate += `title ~* '${req.query.search}' OR 
+                     dev_name ~* '${req.query.search}' OR 
+                     repo ~* '${req.query.search}' OR 
+                     organisation ~* '${req.query.search}' `;
+    }
+
+    predicate += `ORDER BY ${sortBy} ${sortType}`;
+
+
+    await get('*', 'tab_issues_view', predicate, req, res, next, 'tab_issues', false);
+
+};
+
+const tab_issues_filter_project = async function (req, res, next) {
+    if (req?.query?.search) {
+        await  get('repo, organisation', 'projects_view', `WHERE repo ~* '${req.query.search}' OR organisation ~* '${req.query.search}'`, req, res, next, 'tab_issues_filter_project');
+    } else {
+        await  get('repo, organisation', 'projects_view', '', req, res, next, 'tab_issues_filter_project');
+    }
+};
+
+const tab_issues_filter_contributor = async function (req, res, next) {
+    if (req?.query?.search) {
+        await  get('dev_name as contributor, avatar_url', 'devs_view', `WHERE dev_name ~* '${req.query.search}'`, req, res, next, 'tab_issues_filter_contributor', false);
+    } else {
+        await  get('dev_name as contributor, avatar_url', 'devs_view', '', req, res, next, 'tab_issues_filter_contributor', false);
+    }
+};
+
 module.exports = {
     overview,
     top_contributors,
@@ -305,4 +372,7 @@ module.exports = {
     tab_prs,
     tab_prs_filter_project,
     tab_prs_filter_contributor,
+    tab_issues,
+    tab_issues_filter_project,
+    tab_issues_filter_contributor,
 }
