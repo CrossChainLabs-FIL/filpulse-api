@@ -1,0 +1,408 @@
+swagger: "2.0"
+info:
+  version: "1.0"
+  title: "FilPulse V2"
+schemes:
+- "http"
+- "https"
+paths:
+  /overview:
+   get:
+      summary: "Overview"
+      operationId: "overview"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  commits:
+                    type: integer
+                  repos:
+                    type: integer
+                  contributors:
+                    type: integer
+                  prs:
+                    type: integer
+                  issues_open:
+                    type: integer
+                  issues_closed:
+                    type: integer
+  /top_contributors:
+   get:
+      summary: "Top Contributors"
+      operationId: "top_contributors"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  dev_name:
+                    type: string
+                  avatar_url:
+                    type: string
+                  contributions:
+                    type: integer
+  /commits:
+   get:
+      summary: "Commits"
+      operationId: "commits"
+      produces: 
+      - "application/json"
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  commits:
+                    type: integer
+                  commit_month:
+                    type: string
+                  display_month:
+                    type: string
+  /active_contributors:
+   get:
+      summary: "Active Contributors"
+      operationId: "active_contributors"
+      produces: 
+      - "application/json"
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  active_contributors:
+                    type: integer
+                  month:
+                    type: string
+                  display_month:
+                    type: string
+
+  /tab_commits:
+   get:
+      summary: "Tab Commits"
+      operationId: "tab_commits"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      - name: "repo"
+        in: "query"
+        description: "Repo"
+        required: false
+        type: string
+      - name: "organisation"
+        in: "query"
+        description: "Organisation"
+        required: false
+        type: string
+      - name: "sortBy"
+        in: "query"
+        description: "Sort by"
+        required: false
+        type: string
+        enum:
+          - "commit_date"
+      - name: "sortType"
+        in: "query"
+        description: "Sort type"
+        required: false
+        type: string
+        enum:
+          - "asc"
+          - "desc"
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  dev_name:
+                    type: string
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+                  commit_hash:
+                    type: string
+                  commit_date:
+                    type: string
+                  avatar_url:
+                    type: string
+                  message:
+                    type: string
+  /tab_commits/filter/project:
+   get:
+      summary: "Tab Commits filter project"
+      operationId: "tab_commits_filter_project"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+  /tab_commits/filter/contributor:
+   get:
+      summary: "Tab Commits filter contributor"
+      operationId: "tab_commits_filter_contributor"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  contributor:
+                    type: string
+                  avatar_url:
+                    type: string
+
+  /tab_contributors:
+   get:
+      summary: "Tab Contributors"
+      operationId: "tab_contributors"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      - name: "repo"
+        in: "query"
+        description: "Repo"
+        required: false
+        type: string
+      - name: "organisation"
+        in: "query"
+        description: "Organisation"
+        required: false
+        type: string
+      - name: "sortBy"
+        in: "query"
+        description: "Sort by"
+        required: false
+        type: string
+        enum:
+          - "contributions"
+          - "open_issues"
+          - "closed_issues"
+          - "open_prs"
+          - "merged_prs"
+      - name: "sortType"
+        in: "query"
+        description: "Sort type"
+        required: false
+        type: string
+        enum:
+          - "asc"
+          - "desc"
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  dev_name:
+                    type: string
+                  avatar_url:
+                    type: string
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+                  contributions:
+                    type: integer
+                  open_issues:
+                    type: integer
+                  closed_issues:
+                    type: integer
+                  open_prs:
+                    type: integer
+                  merged_prs:
+                    type: integer
+  /tab_contributors/filter/project:
+   get:
+      summary: "Tab Contributors filter project"
+      operationId: "tab_contributors_filter_project"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+  /tab_contributors/filter/contributor:
+   get:
+      summary: "Tab Contributors filter contributor"
+      operationId: "tab_contributors_filter_contributor"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  contributor:
+                    type: string
+                  avatar_url:
+                    type: string
+              
+  /tab_prs:
+   get:
+      summary: "Tab PRs"
+      operationId: "tab_prs"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      - name: "repo"
+        in: "query"
+        description: "Repo"
+        required: false
+        type: string
+      - name: "organisation"
+        in: "query"
+        description: "Organisation"
+        required: false
+        type: string
+      - name: "sortBy"
+        in: "query"
+        description: "Sort by"
+        required: false
+        type: string
+        enum:
+          - "updated_at"
+      - name: "sortType"
+        in: "query"
+        description: "Sort type"
+        required: false
+        type: string
+        enum:
+          - "asc"
+          - "desc"
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  pr_number:
+                    type: integer
+                  title:
+                    type: string
+                  html_url:
+                    type: string
+                  dev_name:
+                    type: string
+                  avatar_url:
+                    type: string
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+                  pr_state:
+                    type: string
+                  updated_at:
+                    type: boolean
+                  pr_state:
+                    type: string
+
+
+  /tab_prs/filter/project:
+   get:
+      summary: "Tab PRs filter project"
+      operationId: "tab_prs_filter_project"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+  /tab_prs/filter/contributor:
+   get:
+      summary: "Tab PRs filter contributor"
+      operationId: "tab_prs_filter_contributor"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  contributor:
+                    type: string
+                  avatar_url:
+                    type: string

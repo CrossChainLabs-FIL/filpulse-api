@@ -22,6 +22,8 @@
     "env-cmd": "^10.1.0",
     "express": "^4.17.2",
     "pg": "^8.7.1",
-    "time-stamp": "^2.2.0"
+    "swagger-ui-express": "^4.5.0",
+    "time-stamp": "^2.2.0",
+    "yamljs": "^0.3.0"
   }
 }
