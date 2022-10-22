@@ -1,6 +1,8 @@
 const config = require('./config');
 const { INFO, ERROR, WARNING } = require('./logs');
 const { Pool } = require("pg");
+const { createToken, validateToken } = require("./token");
+const bcrypt = require("bcryptjs");
 
 const pool = new Pool(config.database);
 
@@ -30,7 +32,6 @@ const get = async function (query, view, predicate, req, res, next, log, single_
                 total: 0,
                 offset: 0
             };
-            console.log('count_query', count_query);
             let count = await pool.query(count_query);
 
             if ((count?.rows.length > 0) && (count.rows[0].count > 0)) {
@@ -39,7 +40,6 @@ const get = async function (query, view, predicate, req, res, next, log, single_
                 }
 
                 let list = await pool.query(main_query + ` OFFSET ${offset} LIMIT 100;`);
-                console.log(main_query + ` OFFSET ${offset} LIMIT 100;`);
                 result = {
                     list: list?.rows,
                     total: count.rows[0].count,
@@ -358,6 +358,135 @@ const tab_issues_filter_contributor = async function (req, res, next) {
     }
 };
 
+const signup = async function (req, res, next) {
+    try {
+        let { username, password, question,  answer} = req.body;
+
+        if (!(username && password && question && answer)) {
+          res.status(400).send("All input is required");
+          return;
+        }
+
+        INFO(`POST[/signup] username: ${username}`);
+
+        username = username.toLowerCase();
+        answer = answer.toLowerCase();
+    
+        let result = await pool.query(`SELECT EXISTS(SELECT 1 FROM users WHERE username = '${username}')`);
+        if (result?.rows[0]?.exists) {
+            res.status(400).send("Username Already Exist. Please Login");
+            return;
+        }
+    
+        let encryptedPassword = await bcrypt.hash(password, 10);
+        let encryptedAnswer = await bcrypt.hash(answer, 10);
+    
+        await pool.query(`
+            INSERT INTO users (username, password, question, answer) 
+            VALUES ('${username}', '${encryptedPassword}', ${question}, '${encryptedAnswer}') 
+            `);
+
+        result = await pool.query(`SELECT * FROM users WHERE username = '${username}'`);
+        let user_data = result?.rows[0];
+
+        if (user_data) {
+            const token = createToken(username);
+
+            let account = {
+                id: user_data.id,
+                token: token
+            }
+
+            res.json(account);
+        } else {
+            res.status(400).send("Signup Error");
+        }
+      } catch (err) {
+        res.status(400).send("Unable to register user");
+        ERROR(`POST[/signup] query: ${JSON.stringify(req.query)}, body: ${JSON.stringify(req.body)}, error:${err}`);
+      }
+};
+
+const login = async function (req, res, next) {
+    try {
+        const { username, password } = req.body;
+
+        if (!(username && password)) {
+            res.status(400).send("All input is required");
+            return;
+        }
+
+        INFO(`POST[/login] username: ${username}`);
+
+        let result = await pool.query(`SELECT * FROM users WHERE username = '${username}'`);
+        let user_data = result?.rows[0];
+
+        if (user_data && (await bcrypt.compare(password, user_data.password))) {
+            const token = createToken(username);
+
+            let account = {
+                id: user_data.id,
+                token: token
+            }
+
+            res.json(account);
+        } else {
+            res.status(400).send("Invalid Credentials");
+        }
+    } catch (err) {
+        res.status(400).send("Invalid Credentials");
+        ERROR(`POST[/login] query: ${JSON.stringify(req.query)}, body: ${JSON.stringify(req.body)}, error:${err}`);
+    }
+};
+
+const reset_password = async function (req, res, next) {
+    try {
+        let { username, password, question,  answer} = req.body;
+
+        if (!(username && password && question && answer)) {
+          res.status(400).send("All input is required");
+          return;
+        }
+
+        INFO(`POST[/reset_password] username: ${username}`);
+
+        username = username.toLowerCase();
+        answer = answer.toLowerCase();
+
+        let result = await pool.query(`SELECT * FROM users WHERE username = '${username}'`);
+        let user_data = result?.rows[0];
+
+        if (!user_data) {
+            res.status(400).send("Username not found , unable to reset password");
+            return;
+        }
+    
+        let encryptedPassword = await bcrypt.hash(password, 10);
+        //let encryptedAnswer = await bcrypt.hash(answer, 10);
+
+        //valide answer
+        if (await bcrypt.compare(answer, user_data.answer)) {
+            //update password 
+            await pool.query(`UPDATE users SET password = '${encryptedPassword}' WHERE username = '${username}';`);
+
+            const token = createToken(username);
+
+            let account = {
+                id: user_data.id,
+                token: token
+            }
+
+            res.json(account);
+        } else {
+            res.status(400).send("Reset password error");
+        }
+
+      } catch (err) {
+        res.status(400).send("Unable to register user");
+        ERROR(`POST[/reset_password] query: ${JSON.stringify(req.query)}, body: ${JSON.stringify(req.body)}, error:${err}`);
+      }
+};
+
 module.exports = {
     overview,
     top_contributors,
@@ -375,4 +504,7 @@ module.exports = {
     tab_issues,
     tab_issues_filter_project,
     tab_issues_filter_contributor,
+    signup,
+    login,
+    reset_password,
 }

@@ -1,0 +1,45 @@
+###
+
+POST http://localhost:3005/signup HTTP/1.1
+content-type: application/json
+
+{
+    "username": "testuser1",
+    "password": "testpwd1",
+    "question": 1,
+    "answer": "testanswer1"
+}
+
+###
+
+POST http://localhost:3005/signup HTTP/1.1
+content-type: application/json
+
+{
+    "username": "testuser2",
+    "password": "testpwd2",
+    "question": 1,
+    "answer": "testanswer2"
+}
+
+###
+
+POST http://localhost:3005/reset_password HTTP/1.1
+content-type: application/json
+
+{
+    "username": "testuser1",
+    "password": "new_testpwd1",
+    "question": 1,
+    "answer": "testanswer1"
+}
+
+###
+
+POST http://localhost:3005/login HTTP/1.1
+content-type: application/json
+
+{
+    "username": "testuser1",
+    "password": "new_testpwd1"
+}

@@ -1,6 +1,7 @@
 module.exports = {
     api: {
       port: process.env.PORT || 3000,
+      token_key: process.env.TOKEN_KEY || '',
     },
     database: {
         user: process.env.DB_USER || '',

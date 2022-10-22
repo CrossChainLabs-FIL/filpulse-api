@@ -17,6 +17,9 @@ const {
     tab_issues,
     tab_issues_filter_project,
     tab_issues_filter_contributor,
+    signup,
+    login,
+    reset_password,
 } = require('./api');
 
 var express = require("express");
@@ -49,8 +52,11 @@ app.get("/tab_issues", tab_issues);
 app.get("/tab_issues/filter/project", tab_issues_filter_project);
 app.get("/tab_issues/filter/contributor", tab_issues_filter_contributor);
 
+app.post("/signup", signup);
+app.post("/login", login);
+app.post("/reset_password", reset_password);
 
 app.listen(config.api.port, () => {
     INFO("Startup");
-    INFO("FilPulse API running on port: " + config.api.port);
+    INFO("FilPulse API V2 running on port: " + config.api.port);
    });

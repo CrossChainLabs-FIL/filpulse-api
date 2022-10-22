@@ -18,9 +18,11 @@
   },
   "homepage": "https://github.com/CrossChainLabs/filpulse-api#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "env-cmd": "^10.1.0",
     "express": "^4.17.2",
+    "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.1",
     "swagger-ui-express": "^4.5.0",
     "time-stamp": "^2.2.0",
