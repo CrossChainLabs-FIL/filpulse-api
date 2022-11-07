@@ -136,9 +136,11 @@ const tab_commits = async function (req, res, next) {
     }
 
 
-    predicate += `ORDER BY ${sortBy} ${sortType}`;
-   
-     await  get('*', 'tab_commits_view', predicate, req, res, next, 'tab_commits', false);
+    if (sortBy && sortType) {
+        predicate += `ORDER BY ${sortBy} ${sortType}`;
+    }
+
+    await get('*', 'tab_commits_view', predicate, req, res, next, 'tab_commits', false);
 
 };
 
@@ -201,8 +203,9 @@ const tab_contributors = async function (req, res, next) {
                      organisation ~* '${req.query.search}' `;
     }
 
-    predicate += `ORDER BY ${sortBy} ${sortType}`;
-
+    if (sortBy && sortType) {
+        predicate += `ORDER BY ${sortBy} ${sortType}`;
+    }
 
     await get('*', 'tab_contributors_view', predicate, req, res, next, 'tab_contributors', false);
 
@@ -268,8 +271,9 @@ const tab_prs = async function (req, res, next) {
                      organisation ~* '${req.query.search}' `;
     }
 
-    predicate += `ORDER BY ${sortBy} ${sortType}`;
-
+    if (sortBy && sortType) {
+        predicate += `ORDER BY ${sortBy} ${sortType}`;
+    }
 
     await get('*', 'tab_prs_view', predicate, req, res, next, 'tab_prs', false);
 
@@ -335,8 +339,9 @@ const tab_issues = async function (req, res, next) {
                      organisation ~* '${req.query.search}' `;
     }
 
-    predicate += `ORDER BY ${sortBy} ${sortType}`;
-
+    if (sortBy && sortType) {
+        predicate += `ORDER BY ${sortBy} ${sortType}`;
+    }
 
     await get('*', 'tab_issues_view', predicate, req, res, next, 'tab_issues', false);
 
@@ -355,6 +360,74 @@ const tab_issues_filter_contributor = async function (req, res, next) {
         await  get('dev_name as contributor, avatar_url', 'devs_view', `WHERE dev_name ~* '${req.query.search}'`, req, res, next, 'tab_issues_filter_contributor', false);
     } else {
         await  get('dev_name as contributor, avatar_url', 'devs_view', '', req, res, next, 'tab_issues_filter_contributor', false);
+    }
+};
+
+const tab_releases = async function (req, res, next) {
+    let predicate = '';
+    let repo = req?.query?.repo;
+    let organisation = req?.query?.organisation;
+    let contributor = req?.query?.contributor;
+    let sortBy = req?.query?.sortBy;
+    let sortType = req?.query?.sortType;
+
+    const sortColumns = ['updated_at'];
+    const sortMode = ['asc', 'desc'];
+
+    if (!sortBy || !sortColumns.includes(sortBy)) {
+        sortBy = 'updated_at';
+    }
+
+    if (!sortType || !sortMode.includes(sortType)) {
+        sortType = 'desc';
+    }
+
+    if (repo && organisation) {
+        predicate = `WHERE repo = '${repo}' AND organisation = '${organisation}'`;
+    }
+
+    if (contributor) {
+        if (!predicate) {
+            predicate = `WHERE dev_name = '${contributor}' `;
+        } else {
+            predicate += `AND dev_name = '${contributor}' `;
+        }
+    }
+
+    if (req?.query?.search) {
+        if (!predicate) {
+            predicate = 'WHERE ';
+        } else {
+            predicate += 'OR ';
+        }
+
+        predicate += `name ~* '${req.query.search}' OR 
+                     dev_name ~* '${req.query.search}' OR 
+                     repo ~* '${req.query.search}' OR 
+                     organisation ~* '${req.query.search}' `;
+    }
+
+    if (sortBy && sortType) {
+        predicate += `ORDER BY ${sortBy} ${sortType}`;
+    }
+
+    await get('*', 'tab_releases_view', predicate, req, res, next, 'tab_releases', false);
+
+};
+
+const tab_releases_filter_project = async function (req, res, next) {
+    if (req?.query?.search) {
+        await  get('repo, organisation', 'projects_view', `WHERE repo ~* '${req.query.search}' OR organisation ~* '${req.query.search}'`, req, res, next, 'tab_issues_filter_project');
+    } else {
+        await  get('repo, organisation', 'projects_view', '', req, res, next, 'tab_releases_filter_project');
+    }
+};
+
+const tab_releases_filter_contributor = async function (req, res, next) {
+    if (req?.query?.search) {
+        await  get('dev_name as contributor, avatar_url', 'devs_view', `WHERE dev_name ~* '${req.query.search}'`, req, res, next, 'tab_issues_filter_contributor', false);
+    } else {
+        await  get('dev_name as contributor, avatar_url', 'devs_view', '', req, res, next, 'tab_releases_filter_contributor', false);
     }
 };
 
@@ -504,7 +577,7 @@ module.exports = {
     tab_issues,
     tab_issues_filter_project,
     tab_issues_filter_contributor,
-    signup,
-    login,
-    reset_password,
+    tab_releases,
+    tab_releases_filter_project,
+    tab_releases_filter_contributor,
 }

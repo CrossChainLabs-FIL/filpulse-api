@@ -17,9 +17,9 @@ const {
     tab_issues,
     tab_issues_filter_project,
     tab_issues_filter_contributor,
-    signup,
-    login,
-    reset_password,
+    tab_releases,
+    tab_releases_filter_project,
+    tab_releases_filter_contributor,
 } = require('./api');
 
 var express = require("express");
@@ -51,10 +51,10 @@ app.get("/tab_prs/filter/contributor", tab_prs_filter_contributor);
 app.get("/tab_issues", tab_issues);
 app.get("/tab_issues/filter/project", tab_issues_filter_project);
 app.get("/tab_issues/filter/contributor", tab_issues_filter_contributor);
+app.get("/tab_releases", tab_releases);
+app.get("/tab_releases/filter/project", tab_releases_filter_project);
+app.get("/tab_releases/filter/contributor", tab_releases_filter_contributor);
 
-app.post("/signup", signup);
-app.post("/login", login);
-app.post("/reset_password", reset_password);
 
 app.listen(config.api.port, () => {
     INFO("Startup");
