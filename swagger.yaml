@@ -514,3 +514,110 @@ paths:
                     type: string
                   avatar_url:
                     type: string
+
+  /tab_releases:
+   get:
+      summary: "Tab Releases"
+      operationId: "tab_releases"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      - name: "repo"
+        in: "query"
+        description: "Repo"
+        required: false
+        type: string
+      - name: "organisation"
+        in: "query"
+        description: "Organisation"
+        required: false
+        type: string
+      - name: "sortBy"
+        in: "query"
+        description: "Sort by"
+        required: false
+        type: string
+        enum:
+          - "updated_at"
+      - name: "sortType"
+        in: "query"
+        description: "Sort type"
+        required: false
+        type: string
+        enum:
+          - "asc"
+          - "desc"
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  dev_name:
+                    type: string
+                  avatar_url:
+                    type: string
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+                  state:
+                    type: string
+                  updated_at:
+                    type: string
+
+
+
+  /tab_releases/filter/project:
+   get:
+      summary: "Tab releases filter project"
+      operationId: "tab_releases_filter_project"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  repo:
+                    type: string
+                  organisation:
+                    type: string
+  /tab_releases/filter/contributor:
+   get:
+      summary: "Tab releases filter contributor"
+      operationId: "tab_releases_filter_contributor"
+      produces: 
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Search by"
+        required: false
+        type: string
+      responses:
+        "200":
+          description: "successful"
+          schema:
+                type: object
+                properties:
+                  contributor:
+                    type: string
+                  avatar_url:
+                    type: string
