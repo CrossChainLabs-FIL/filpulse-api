@@ -3,6 +3,7 @@ const { INFO, ERROR, WARNING } = require('./logs');
 const { Pool } = require("pg");
 const { createToken, validateToken } = require("./token");
 const bcrypt = require("bcryptjs");
+const axios = require('axios');
 
 const pool = new Pool(config.database);
 
@@ -560,6 +561,41 @@ const reset_password = async function (req, res, next) {
       }
 };
 
+const authenticate = async function (req, res, next) {
+    const { code } = req.body;
+    const { client_id, client_secret, redirect_uri } = config.login;
+
+    let data = {
+        client_id: client_id,
+        client_secret: client_secret,
+        code: code,
+        redirect_uri: redirect_uri
+    }
+
+    try {
+
+        if (!code) {
+            return res.status(400);
+        }
+
+        let response = await axios.post(`https://github.com/login/oauth/access_token`, data);
+        let params = new URLSearchParams(response.data);
+        const access_token = params.get("access_token");
+
+
+        let user_response = await axios.get(`https://api.github.com/user`, {
+            headers: {
+                Authorization: `token ${access_token}`,
+            },
+        });
+
+        res.json(user_response.data);
+    } catch (err) {
+        res.status(400).send("Unable to authenticate user");
+        ERROR(`POST[/authenticate] error:${err}`);
+    }
+};
+
 module.exports = {
     overview,
     top_contributors,
@@ -580,4 +616,5 @@ module.exports = {
     tab_releases,
     tab_releases_filter_project,
     tab_releases_filter_contributor,
+    authenticate,
 }

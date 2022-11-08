@@ -20,6 +20,7 @@ const {
     tab_releases,
     tab_releases_filter_project,
     tab_releases_filter_contributor,
+    authenticate,
 } = require('./api');
 
 var express = require("express");
@@ -54,6 +55,8 @@ app.get("/tab_issues/filter/contributor", tab_issues_filter_contributor);
 app.get("/tab_releases", tab_releases);
 app.get("/tab_releases/filter/project", tab_releases_filter_project);
 app.get("/tab_releases/filter/contributor", tab_releases_filter_contributor);
+
+app.post("/authenticate", authenticate);
 
 
 app.listen(config.api.port, () => {
