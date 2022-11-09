@@ -233,7 +233,7 @@ const tab_prs = async function (req, res, next) {
 
     const sortColumns = ['updated_at'];
     const sortMode = ['asc', 'desc'];
-    const statusValues = ['Merged', 'Open', 'Closed'];
+    const statusValues = ['merged', 'open', 'closed'];
 
     if (!sortBy || !sortColumns.includes(sortBy)) {
         sortBy = 'updated_at';
@@ -308,7 +308,7 @@ const tab_issues = async function (req, res, next) {
 
     const sortColumns = ['updated_at'];
     const sortMode = ['asc', 'desc'];
-    const statusValues = ['Open', 'Closed'];
+    const statusValues = ['open', 'closed'];
 
     if (!sortBy || !sortColumns.includes(sortBy)) {
         sortBy = 'updated_at';
