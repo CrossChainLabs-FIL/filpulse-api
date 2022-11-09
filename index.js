@@ -17,6 +17,7 @@ const {
     tab_issues,
     tab_issues_filter_project,
     tab_issues_filter_contributor,
+    tab_issues_filter_assignee,
     tab_releases,
     tab_releases_filter_project,
     tab_releases_filter_contributor,
@@ -52,6 +53,7 @@ app.get("/tab_prs/filter/contributor", tab_prs_filter_contributor);
 app.get("/tab_issues", tab_issues);
 app.get("/tab_issues/filter/project", tab_issues_filter_project);
 app.get("/tab_issues/filter/contributor", tab_issues_filter_contributor);
+app.get("/tab_issues/filter/assignee", tab_issues_filter_assignee);
 app.get("/tab_releases", tab_releases);
 app.get("/tab_releases/filter/project", tab_releases_filter_project);
 app.get("/tab_releases/filter/contributor", tab_releases_filter_contributor);

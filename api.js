@@ -302,6 +302,7 @@ const tab_issues = async function (req, res, next) {
     let repo = req?.query?.repo;
     let organisation = req?.query?.organisation;
     let contributor = req?.query?.contributor;
+    let assignee = req?.query?.assignee;
     let sortBy = req?.query?.sortBy;
     let sortType = req?.query?.sortType;
     let status = req?.query?.status;
@@ -320,6 +321,14 @@ const tab_issues = async function (req, res, next) {
 
     if (repo && organisation) {
         predicate = `WHERE repo = '${repo}' AND organisation = '${organisation}'`;
+    }
+
+    if (assignee) {
+        if (!predicate) {
+            predicate = `WHERE assignees ~* '${assignee}' `;
+        } else {
+            predicate += `AND assignees ~* '${assignee}' `;
+        }
     }
 
     if (contributor) {
@@ -369,6 +378,14 @@ const tab_issues_filter_contributor = async function (req, res, next) {
         await  get('dev_name as contributor, avatar_url', 'devs_view', `WHERE dev_name ~* '${req.query.search}'`, req, res, next, 'tab_issues_filter_contributor', false);
     } else {
         await  get('dev_name as contributor, avatar_url', 'devs_view', '', req, res, next, 'tab_issues_filter_contributor', false);
+    }
+};
+
+const tab_issues_filter_assignee = async function (req, res, next) {
+    if (req?.query?.search) {
+        await  get('dev_name as assignee, avatar_url', 'devs_view', `WHERE dev_name ~* '${req.query.search}'`, req, res, next, 'tab_issues_filter_assignee', false);
+    } else {
+        await  get('dev_name as assignee, avatar_url', 'devs_view', '', req, res, next, 'tab_issues_filter_assignee', false);
     }
 };
 
@@ -628,6 +645,7 @@ module.exports = {
     tab_issues,
     tab_issues_filter_project,
     tab_issues_filter_contributor,
+    tab_issues_filter_assignee,
     tab_releases,
     tab_releases_filter_project,
     tab_releases_filter_contributor,
