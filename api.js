@@ -126,14 +126,10 @@ const tab_commits = async function (req, res, next) {
         if (!predicate) {
             predicate = 'WHERE ';
         } else {
-            predicate += 'OR ';
+            predicate += 'AND ';
         }
-        
-        predicate +=`dev_name ~* '${req.query.search}' OR 
-                     repo ~* '${req.query.search}' OR 
-                     organisation ~* '${req.query.search}' OR 
-                     message ~* '${req.query.search}' OR 
-                     commit_hash ~* '${req.query.search}' `;
+
+        predicate += `message ~* '${req.query.search}' `;
     }
 
 
@@ -196,12 +192,10 @@ const tab_contributors = async function (req, res, next) {
         if (!predicate) {
             predicate = 'WHERE ';
         } else {
-            predicate += 'OR ';
+            predicate += 'AND ';
         }
 
-        predicate += `dev_name ~* '${req.query.search}' OR 
-                     repo ~* '${req.query.search}' OR 
-                     organisation ~* '${req.query.search}' `;
+        predicate += `dev_name ~* '${req.query.search}' `;
     }
 
     if (sortBy && sortType) {
@@ -263,13 +257,10 @@ const tab_prs = async function (req, res, next) {
         if (!predicate) {
             predicate = 'WHERE ';
         } else {
-            predicate += 'OR ';
+            predicate += 'AND ';
         }
 
-        predicate += `title ~* '${req.query.search}' OR 
-                     dev_name ~* '${req.query.search}' OR 
-                     repo ~* '${req.query.search}' OR 
-                     organisation ~* '${req.query.search}' `;
+        predicate += `title ~* '${req.query.search}' `;
     }
 
     if (sortBy && sortType) {
@@ -331,13 +322,10 @@ const tab_issues = async function (req, res, next) {
         if (!predicate) {
             predicate = 'WHERE ';
         } else {
-            predicate += 'OR ';
+            predicate += 'AND ';
         }
 
-        predicate += `title ~* '${req.query.search}' OR 
-                     dev_name ~* '${req.query.search}' OR 
-                     repo ~* '${req.query.search}' OR 
-                     organisation ~* '${req.query.search}' `;
+        predicate += `title ~* '${req.query.search}' `;
     }
 
     if (sortBy && sortType) {
@@ -399,13 +387,10 @@ const tab_releases = async function (req, res, next) {
         if (!predicate) {
             predicate = 'WHERE ';
         } else {
-            predicate += 'OR ';
+            predicate += 'AND ';
         }
 
-        predicate += `name ~* '${req.query.search}' OR 
-                     dev_name ~* '${req.query.search}' OR 
-                     repo ~* '${req.query.search}' OR 
-                     organisation ~* '${req.query.search}' `;
+        predicate += `name ~* '${req.query.search}' `;
     }
 
     if (sortBy && sortType) {
