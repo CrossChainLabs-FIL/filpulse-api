@@ -229,9 +229,11 @@ const tab_prs = async function (req, res, next) {
     let contributor = req?.query?.contributor;
     let sortBy = req?.query?.sortBy;
     let sortType = req?.query?.sortType;
+    let status = req?.query?.status;
 
     const sortColumns = ['updated_at'];
     const sortMode = ['asc', 'desc'];
+    const statusValues = ['Merged', 'Open', 'Closed'];
 
     if (!sortBy || !sortColumns.includes(sortBy)) {
         sortBy = 'updated_at';
@@ -250,6 +252,14 @@ const tab_prs = async function (req, res, next) {
             predicate = `WHERE dev_name = '${contributor}' `;
         } else {
             predicate += `AND dev_name = '${contributor}' `;
+        }
+    }
+
+    if (status || statusValues.includes(status)) {
+        if (!predicate) {
+            predicate = `WHERE pr_state = '${status}' `;
+        } else {
+            predicate += `AND pr_state = '${status}' `;
         }
     }
 
@@ -294,9 +304,11 @@ const tab_issues = async function (req, res, next) {
     let contributor = req?.query?.contributor;
     let sortBy = req?.query?.sortBy;
     let sortType = req?.query?.sortType;
+    let status = req?.query?.status;
 
     const sortColumns = ['updated_at'];
     const sortMode = ['asc', 'desc'];
+    const statusValues = ['Open', 'Closed'];
 
     if (!sortBy || !sortColumns.includes(sortBy)) {
         sortBy = 'updated_at';
@@ -315,6 +327,14 @@ const tab_issues = async function (req, res, next) {
             predicate = `WHERE dev_name = '${contributor}' `;
         } else {
             predicate += `AND dev_name = '${contributor}' `;
+        }
+    }
+
+    if (status || statusValues.includes(status)) {
+        if (!predicate) {
+            predicate = `WHERE issue_state = '${status}' `;
+        } else {
+            predicate += `AND issue_state = '${status}' `;
         }
     }
 
@@ -359,9 +379,11 @@ const tab_releases = async function (req, res, next) {
     let contributor = req?.query?.contributor;
     let sortBy = req?.query?.sortBy;
     let sortType = req?.query?.sortType;
+    let status = req?.query?.status;
 
     const sortColumns = ['updated_at'];
     const sortMode = ['asc', 'desc'];
+    const statusValues = ['Draft', 'Pre-release', 'Released', 'Latest'];
 
     if (!sortBy || !sortColumns.includes(sortBy)) {
         sortBy = 'updated_at';
@@ -380,6 +402,14 @@ const tab_releases = async function (req, res, next) {
             predicate = `WHERE dev_name = '${contributor}' `;
         } else {
             predicate += `AND dev_name = '${contributor}' `;
+        }
+    }
+
+    if (status || statusValues.includes(status)) {
+        if (!predicate) {
+            predicate = `WHERE state = '${status}' `;
+        } else {
+            predicate += `AND state = '${status}' `;
         }
     }
 
