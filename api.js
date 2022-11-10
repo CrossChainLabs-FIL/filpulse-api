@@ -257,9 +257,9 @@ const tab_prs = async function (req, res, next) {
 
     if (status || statusValues.includes(status)) {
         if (!predicate) {
-            predicate = `WHERE pr_state = '${status}' `;
+            predicate = `WHERE state = '${status}' `;
         } else {
-            predicate += `AND pr_state = '${status}' `;
+            predicate += `AND state = '${status}' `;
         }
     }
 
@@ -341,9 +341,9 @@ const tab_issues = async function (req, res, next) {
 
     if (status || statusValues.includes(status)) {
         if (!predicate) {
-            predicate = `WHERE issue_state = '${status}' `;
+            predicate = `WHERE state = '${status}' `;
         } else {
-            predicate += `AND issue_state = '${status}' `;
+            predicate += `AND state = '${status}' `;
         }
     }
 
@@ -464,135 +464,6 @@ const tab_releases_filter_contributor = async function (req, res, next) {
     }
 };
 
-const signup = async function (req, res, next) {
-    try {
-        let { username, password, question,  answer} = req.body;
-
-        if (!(username && password && question && answer)) {
-          res.status(400).send("All input is required");
-          return;
-        }
-
-        INFO(`POST[/signup] username: ${username}`);
-
-        username = username.toLowerCase();
-        answer = answer.toLowerCase();
-    
-        let result = await pool.query(`SELECT EXISTS(SELECT 1 FROM users WHERE username = '${username}')`);
-        if (result?.rows[0]?.exists) {
-            res.status(400).send("Username Already Exist. Please Login");
-            return;
-        }
-    
-        let encryptedPassword = await bcrypt.hash(password, 10);
-        let encryptedAnswer = await bcrypt.hash(answer, 10);
-    
-        await pool.query(`
-            INSERT INTO users (username, password, question, answer) 
-            VALUES ('${username}', '${encryptedPassword}', ${question}, '${encryptedAnswer}') 
-            `);
-
-        result = await pool.query(`SELECT * FROM users WHERE username = '${username}'`);
-        let user_data = result?.rows[0];
-
-        if (user_data) {
-            const token = createToken(username);
-
-            let account = {
-                id: user_data.id,
-                token: token
-            }
-
-            res.json(account);
-        } else {
-            res.status(400).send("Signup Error");
-        }
-      } catch (err) {
-        res.status(400).send("Unable to register user");
-        ERROR(`POST[/signup] query: ${JSON.stringify(req.query)}, body: ${JSON.stringify(req.body)}, error:${err}`);
-      }
-};
-
-const login = async function (req, res, next) {
-    try {
-        const { username, password } = req.body;
-
-        if (!(username && password)) {
-            res.status(400).send("All input is required");
-            return;
-        }
-
-        INFO(`POST[/login] username: ${username}`);
-
-        let result = await pool.query(`SELECT * FROM users WHERE username = '${username}'`);
-        let user_data = result?.rows[0];
-
-        if (user_data && (await bcrypt.compare(password, user_data.password))) {
-            const token = createToken(username);
-
-            let account = {
-                id: user_data.id,
-                token: token
-            }
-
-            res.json(account);
-        } else {
-            res.status(400).send("Invalid Credentials");
-        }
-    } catch (err) {
-        res.status(400).send("Invalid Credentials");
-        ERROR(`POST[/login] query: ${JSON.stringify(req.query)}, body: ${JSON.stringify(req.body)}, error:${err}`);
-    }
-};
-
-const reset_password = async function (req, res, next) {
-    try {
-        let { username, password, question,  answer} = req.body;
-
-        if (!(username && password && question && answer)) {
-          res.status(400).send("All input is required");
-          return;
-        }
-
-        INFO(`POST[/reset_password] username: ${username}`);
-
-        username = username.toLowerCase();
-        answer = answer.toLowerCase();
-
-        let result = await pool.query(`SELECT * FROM users WHERE username = '${username}'`);
-        let user_data = result?.rows[0];
-
-        if (!user_data) {
-            res.status(400).send("Username not found , unable to reset password");
-            return;
-        }
-    
-        let encryptedPassword = await bcrypt.hash(password, 10);
-        //let encryptedAnswer = await bcrypt.hash(answer, 10);
-
-        //valide answer
-        if (await bcrypt.compare(answer, user_data.answer)) {
-            //update password 
-            await pool.query(`UPDATE users SET password = '${encryptedPassword}' WHERE username = '${username}';`);
-
-            const token = createToken(username);
-
-            let account = {
-                id: user_data.id,
-                token: token
-            }
-
-            res.json(account);
-        } else {
-            res.status(400).send("Reset password error");
-        }
-
-      } catch (err) {
-        res.status(400).send("Unable to register user");
-        ERROR(`POST[/reset_password] query: ${JSON.stringify(req.query)}, body: ${JSON.stringify(req.body)}, error:${err}`);
-      }
-};
-
 const authenticate = async function (req, res, next) {
     const { code } = req.body;
     const { client_id, client_secret, redirect_uri } = config.login;
@@ -659,26 +530,25 @@ const authenticate = async function (req, res, next) {
 const issues_follow = async function (req, res, next) {
     try {
         if (req.authenticated) {
-            const { issue_number, follow, repo, organisation } = req.body;
-            if ( issue_number && repo && organisation ) {
+            const { number, follow, repo, organisation } = req.body;
+
+            if ( number && repo && organisation ) {
                 if (follow == true) {
-                    let values = `
-                    ${req.user_id}, 
-                    'issue',
-                    '${issue_number}',
+                    let values = `${req.user_id}, 
+                    ${number},
                     '${repo}',
-                    '${organisation}'
-                    `;
+                    '${organisation}'`;
                     let query = `\
-                        INSERT INTO watchlist (user_id, item_type, id, repo, organisation) \
+                        INSERT INTO watchlist (user_id, number, repo, organisation) \
                         SELECT ${values} WHERE NOT EXISTS 
-                        (SELECT 1 FROM watchlist WHERE user_id=${req.user_id} AND repo='${repo}' AND organisation='${organisation}' AND item_type='issue');`;
+                        (SELECT 1 FROM watchlist WHERE number=${number} AND user_id=${req.user_id} AND repo='${repo}' AND organisation='${organisation}');`;
                     await pool.query(query);
                 } else {
 
+
+
                 }
             }
-            console.log('user_id', req.user_id, 'issue_number', issue_number, follow);
         } else {
             res.status(400).send("Invalid token, please login");
         }
