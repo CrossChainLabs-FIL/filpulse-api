@@ -1,5 +1,6 @@
 const config = require('./config');
 const { INFO } = require('./logs');
+const { validateToken } = require("./token");
 const { 
     overview,
     top_contributors,
@@ -22,6 +23,7 @@ const {
     tab_releases_filter_project,
     tab_releases_filter_contributor,
     authenticate,
+    issues_follow,
 } = require('./api');
 
 var express = require("express");
@@ -59,6 +61,7 @@ app.get("/tab_releases/filter/project", tab_releases_filter_project);
 app.get("/tab_releases/filter/contributor", tab_releases_filter_contributor);
 
 app.post("/authenticate", authenticate);
+app.post("/issues/follow", validateToken, issues_follow);
 
 
 app.listen(config.api.port, () => {

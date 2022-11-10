@@ -165,7 +165,7 @@ const tab_contributors = async function (req, res, next) {
     let sortBy = req?.query?.sortBy;
     let sortType = req?.query?.sortType;
 
-    const sortColumns = ['contributions', 'open_issues', 'closed_issues', 'open_prs', 'merged_prs'];
+    const sortColumns = ['contributions', 'open_issues', 'closed_issues', 'open_prs', 'closed_prs'];
     const sortMode = ['asc', 'desc'];
 
     if (!sortBy || !sortColumns.includes(sortBy)) {
@@ -621,7 +621,67 @@ const authenticate = async function (req, res, next) {
             },
         });
 
-        res.json(user_response.data);
+        if (user_response.status == 200 && user_response?.data?.login && user_response?.data?.type == 'User') {
+            let github_user = {
+                username: user_response?.data?.login,
+                avatar_url: user_response?.data?.avatar_url,
+            }
+
+            let values = `'${github_user.username}', '${github_user.avatar_url}'`;
+            let query = `\
+                UPDATE users SET avatar_url='${github_user.avatar_url}'\
+                    WHERE username='${github_user.username}'; \
+                INSERT INTO users (username, avatar_url) \
+                    SELECT ${values} WHERE NOT EXISTS (SELECT 1 FROM users WHERE username='${github_user.username}');`;
+
+
+            await pool.query(query);
+
+            let result = await pool.query(`SELECT id, username, avatar_url FROM users WHERE username='${github_user.username}'`);
+            let user_data = result.rows[0];
+            const token = createToken(user_data);
+            let user = {
+                ...user_data,
+                token: token
+            }
+
+            console.log(user);
+
+            res.json(user);
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(400).send("Unable to authenticate user");
+        ERROR(`POST[/authenticate] error:${err}`);
+    }
+};
+
+const issues_follow = async function (req, res, next) {
+    try {
+        if (req.authenticated) {
+            const { issue_number, follow, repo, organisation } = req.body;
+            if ( issue_number && repo && organisation ) {
+                if (follow == true) {
+                    let values = `
+                    ${req.user_id}, 
+                    'issue',
+                    '${issue_number}',
+                    '${repo}',
+                    '${organisation}'
+                    `;
+                    let query = `\
+                        INSERT INTO watchlist (user_id, item_type, id, repo, organisation) \
+                        SELECT ${values} WHERE NOT EXISTS 
+                        (SELECT 1 FROM watchlist WHERE user_id=${req.user_id} AND repo='${repo}' AND organisation='${organisation}' AND item_type='issue');`;
+                    await pool.query(query);
+                } else {
+
+                }
+            }
+            console.log('user_id', req.user_id, 'issue_number', issue_number, follow);
+        } else {
+            res.status(400).send("Invalid token, please login");
+        }
     } catch (err) {
         res.status(400).send("Unable to authenticate user");
         ERROR(`POST[/authenticate] error:${err}`);
@@ -650,4 +710,5 @@ module.exports = {
     tab_releases_filter_project,
     tab_releases_filter_contributor,
     authenticate,
+    issues_follow,
 }
