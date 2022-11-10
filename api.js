@@ -544,11 +544,64 @@ const issues_follow = async function (req, res, next) {
                         (SELECT 1 FROM watchlist WHERE number=${number} AND user_id=${req.user_id} AND repo='${repo}' AND organisation='${organisation}');`;
                     await pool.query(query);
                 } else {
-
-
-
+                    let query = `\
+                        DELETE FROM watchlist \
+                        WHERE number=${number} AND user_id=${req.user_id} AND repo='${repo}' AND organisation='${organisation}';`;
+                    await pool.query(query);
                 }
             }
+        } else {
+            res.status(400).send("Invalid token, please login");
+        }
+    } catch (err) {
+        res.status(400).send("Unable to authenticate user");
+        ERROR(`POST[/authenticate] error:${err}`);
+    }
+};
+
+const tab_watchlist = async function (req, res, next) {
+    try {
+        if (req.authenticated) {
+            let predicate = '';
+            let sortBy = req?.query?.sortBy;
+            let sortType = req?.query?.sortType;
+            let status = req?.query?.status;
+        
+            const sortColumns = ['updated_at'];
+            const sortMode = ['asc', 'desc'];
+            const statusValues = ['open', 'closed'];
+        
+            if (!sortBy || !sortColumns.includes(sortBy)) {
+                sortBy = 'updated_at';
+            }
+        
+            if (!sortType || !sortMode.includes(sortType)) {
+                sortType = 'desc';
+            }
+        
+            if (status || statusValues.includes(status)) {
+                if (!predicate) {
+                    predicate = `WHERE state = '${status}' `;
+                } else {
+                    predicate += `AND state = '${status}' `;
+                }
+            }
+        
+            if (req?.query?.search) {
+                if (!predicate) {
+                    predicate = 'WHERE ';
+                } else {
+                    predicate += 'AND ';
+                }
+        
+                predicate += `title ~* '${req.query.search}' `;
+            }
+        
+            if (sortBy && sortType) {
+                predicate += `ORDER BY ${sortBy} ${sortType}`;
+            }
+        
+            await get('*', 'tab_watchlist_view', predicate, req, res, next, 'tab_watchlist', false);
         } else {
             res.status(400).send("Invalid token, please login");
         }
@@ -581,4 +634,5 @@ module.exports = {
     tab_releases_filter_contributor,
     authenticate,
     issues_follow,
+    tab_watchlist,
 }

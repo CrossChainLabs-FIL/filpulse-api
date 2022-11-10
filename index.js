@@ -24,6 +24,7 @@ const {
     tab_releases_filter_contributor,
     authenticate,
     issues_follow,
+    tab_watchlist,
 } = require('./api');
 
 var express = require("express");
@@ -62,7 +63,7 @@ app.get("/tab_releases/filter/contributor", tab_releases_filter_contributor);
 
 app.post("/authenticate", authenticate);
 app.post("/issues/follow", validateToken, issues_follow);
-
+app.post("/tab_watchlist", validateToken, tab_watchlist);
 
 app.listen(config.api.port, () => {
     INFO("Startup");
