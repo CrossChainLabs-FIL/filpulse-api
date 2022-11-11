@@ -59,7 +59,6 @@ const get = async function (query, view, predicate, req, res, next, log, single_
                 INFO(`GET[${log}]: ${JSON.stringify(result)}`);
             } else {
                 INFO(`GET[${log}]: offset: ${offset}, total: ${result.total}, items: ${result?.list?.length}`);
-
             }
             res.json(result);
         } else {
@@ -69,6 +68,57 @@ const get = async function (query, view, predicate, req, res, next, log, single_
 
     } catch (e) {
         ERROR(`GET[${log} ${query} on ${view}]: error: ${e}`);
+        error_response(401, `Failed to get ${log}`, res);
+    }
+};
+
+// GET
+const get_query = async function (query, req, res, next, log) {
+    try {
+        var result = undefined;
+        let count_query;
+        let main_query;
+        let offset = 0;
+
+
+        count_query = `SELECT COUNT(*) FROM (${query}) AS total;`
+        main_query = `${query}`;
+
+
+
+        result = {
+            list: [],
+            total: 0,
+            offset: 0
+        };
+        let count = await pool.query(count_query);
+
+        if ((count?.rows.length > 0) && (count.rows[0].count > 0)) {
+            if (req?.query?.offset && (parseInt(req.query.offset) < parseInt(count.rows[0].count))) {
+                offset = parseInt(req?.query?.offset);
+            }
+
+            console.log(main_query + ` OFFSET ${offset} LIMIT 100;`)
+
+            let list = await pool.query(main_query + ` OFFSET ${offset} LIMIT 100;`);
+            result = {
+                list: list?.rows,
+                total: count.rows[0].count,
+                offset: offset
+            }
+        }
+
+        if (result) {
+            INFO(`GET[${log}]: offset: ${offset}, total: ${result.total}, items: ${result?.list?.length}`);
+
+            res.json(result);
+        } else {
+            ERROR(`GET[${log} ${query}]: Failed, result: ${JSON.stringify(result)}`);
+            error_response(402, `Failed to get ${log}`, res);
+        }
+
+    } catch (e) {
+        ERROR(`GET[${log} ${query}]: error: ${e}`);
         error_response(401, `Failed to get ${log}`, res);
     }
 };
@@ -235,6 +285,10 @@ const tab_prs = async function (req, res, next) {
     const sortMode = ['asc', 'desc'];
     const statusValues = ['merged', 'open', 'closed'];
 
+    if (req.authenticated) {
+        console.log('tab_prs', 'user_id', req.user_id)
+    }
+
     if (!sortBy || !sortColumns.includes(sortBy)) {
         sortBy = 'updated_at';
     }
@@ -277,7 +331,31 @@ const tab_prs = async function (req, res, next) {
         predicate += `ORDER BY ${sortBy} ${sortType}`;
     }
 
-    await get('*', 'tab_prs_view', predicate, req, res, next, 'tab_prs', false);
+    let main_query = `
+    SELECT
+        tab_prs_view.number,
+        tab_prs_view.title,
+        tab_prs_view.html_url,
+        tab_prs_view.dev_name,
+        tab_prs_view.avatar_url,
+        tab_prs_view.repo,
+        tab_prs_view.organisation,
+        tab_prs_view.state,
+        tab_prs_view.updated_at,
+        CASE WHEN tab_watchlist_view.viewed_at is not null THEN true ELSE false END as follow
+        FROM tab_prs_view
+        LEFT JOIN tab_watchlist_view ON tab_watchlist_view.number = tab_prs_view.number
+                         AND tab_watchlist_view.repo = tab_prs_view.repo
+                         AND tab_watchlist_view.organisation = tab_prs_view.organisation
+        `;
+
+    if (predicate) {
+        main_query += predicate;
+    }
+
+    console.log(main_query);
+
+    await get_query(main_query, req, res, next, 'tab_prs');
 
 };
 
@@ -310,6 +388,10 @@ const tab_issues = async function (req, res, next) {
     const sortColumns = ['updated_at'];
     const sortMode = ['asc', 'desc'];
     const statusValues = ['open', 'closed'];
+
+    if (req.authenticated) {
+        console.log('tab_issues', 'user_id', req.user_id)
+    }
 
     if (!sortBy || !sortColumns.includes(sortBy)) {
         sortBy = 'updated_at';
@@ -527,7 +609,7 @@ const authenticate = async function (req, res, next) {
     }
 };
 
-const issues_follow = async function (req, res, next) {
+const follow = async function (req, res, next) {
     try {
         if (req.authenticated) {
             const { number, follow, repo, organisation } = req.body;
@@ -633,6 +715,6 @@ module.exports = {
     tab_releases_filter_project,
     tab_releases_filter_contributor,
     authenticate,
-    issues_follow,
+    follow,
     tab_watchlist,
 }
