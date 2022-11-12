@@ -581,6 +581,7 @@ const authenticate = async function (req, res, next) {
     }
 
     try {
+        INFO(`POST[authenticate]`);
 
         if (!code) {
             return res.status(400);
@@ -635,10 +636,14 @@ const authenticate = async function (req, res, next) {
 const follow = async function (req, res, next) {
     try {
         if (req.authenticated) {
-            const { number, follow, repo, organisation } = req.body;
+            const { number, follow, repo, organisation } = req.query;
+            console.log( req.query );
+
+            INFO(`POST[follow] user_id: ${req.user_id}, ${JSON.stringify(req.query)}`);
 
             if ( number && repo && organisation ) {
-                if (follow == true) {
+
+                if (follow == 'true') {
                     let values = `${req.user_id}, 
                     ${number},
                     '${repo}',
@@ -647,13 +652,16 @@ const follow = async function (req, res, next) {
                         INSERT INTO watchlist (user_id, number, repo, organisation) \
                         SELECT ${values} WHERE NOT EXISTS 
                         (SELECT 1 FROM watchlist WHERE number=${number} AND user_id=${req.user_id} AND repo='${repo}' AND organisation='${organisation}');`;
+                        
                     await pool.query(query);
+                    INFO(`POST[follow] user_id: ${req.user_id}, ${JSON.stringify(req.query)} succesful`);
                 } else {
                     let query = `\
                         DELETE FROM watchlist \
                         WHERE number=${number} AND user_id=${req.user_id} AND repo='${repo}' AND organisation='${organisation}';`;
                     await pool.query(query);
                 }
+                INFO(`POST[follow] user_id: ${req.user_id}, ${JSON.stringify(req.query)} succesful`);
                 res.status(200).send("success");
             } else {
                 res.status(401).send("Invalid params");
