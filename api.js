@@ -98,8 +98,6 @@ const get_query = async function (query, req, res, next, log) {
                 offset = parseInt(req?.query?.offset);
             }
 
-            console.log(main_query + ` OFFSET ${offset} LIMIT 100;`)
-
             let list = await pool.query(main_query + ` OFFSET ${offset} LIMIT 100;`);
             result = {
                 list: list?.rows,
@@ -285,10 +283,6 @@ const tab_prs = async function (req, res, next) {
     const sortMode = ['asc', 'desc'];
     const statusValues = ['merged', 'open', 'closed'];
 
-    if (req.authenticated) {
-        console.log('tab_prs', 'user_id', req.user_id)
-    }
-
     if (!sortBy || !sortColumns.includes(sortBy)) {
         sortBy = 'updated_at';
     }
@@ -331,8 +325,10 @@ const tab_prs = async function (req, res, next) {
         predicate += `ORDER BY ${sortBy} ${sortType}`;
     }
 
-    let main_query = `
-    SELECT
+    if (req.authenticated) {
+        let main_query = `
+        with watchlist_data as ( SELECT * FROM tab_watchlist_view WHERE user_id = ${req.user_id})
+        SELECT
         tab_prs_view.number,
         tab_prs_view.title,
         tab_prs_view.html_url,
@@ -342,20 +338,21 @@ const tab_prs = async function (req, res, next) {
         tab_prs_view.organisation,
         tab_prs_view.state,
         tab_prs_view.updated_at,
-        CASE WHEN tab_watchlist_view.viewed_at is not null THEN true ELSE false END as follow
+        CASE WHEN watchlist_data.viewed_at is not null THEN true ELSE false END as follow
         FROM tab_prs_view
-        LEFT JOIN tab_watchlist_view ON tab_watchlist_view.number = tab_prs_view.number
-                         AND tab_watchlist_view.repo = tab_prs_view.repo
-                         AND tab_watchlist_view.organisation = tab_prs_view.organisation
+        LEFT JOIN watchlist_data ON watchlist_data.number = tab_prs_view.number
+                         AND watchlist_data.repo = tab_prs_view.repo
+                         AND watchlist_data.organisation = tab_prs_view.organisation
         `;
 
-    if (predicate) {
-        main_query += predicate;
+        if (predicate) {
+            main_query += predicate;
+        }
+
+        await get_query(main_query, req, res, next, 'tab_prs');
+    } else {
+        await get('*, false as follow', 'tab_prs_view', predicate, req, res, next, 'tab_prs', false);
     }
-
-    console.log(main_query);
-
-    await get_query(main_query, req, res, next, 'tab_prs');
 
 };
 
@@ -443,7 +440,35 @@ const tab_issues = async function (req, res, next) {
         predicate += `ORDER BY ${sortBy} ${sortType}`;
     }
 
-    await get('*', 'tab_issues_view', predicate, req, res, next, 'tab_issues', false);
+    if (req.authenticated) {
+        let main_query = `
+    with watchlist_data as ( SELECT * FROM tab_watchlist_view WHERE user_id = ${req.user_id})
+    SELECT
+        tab_issues_view.number,
+        tab_issues_view.title,
+        tab_issues_view.html_url,
+        tab_issues_view.dev_name,
+        tab_issues_view.avatar_url,
+        tab_issues_view.repo,
+        tab_issues_view.organisation,
+        tab_issues_view.state,
+        tab_issues_view.assignees,
+        tab_issues_view.updated_at,
+        CASE WHEN watchlist_data.viewed_at is not null THEN true ELSE false END as follow
+        FROM tab_issues_view
+        LEFT JOIN watchlist_data ON watchlist_data.number = tab_issues_view.number
+                         AND watchlist_data.repo = tab_issues_view.repo
+                         AND watchlist_data.organisation = tab_issues_view.organisation
+        `;
+
+        if (predicate) {
+            main_query += predicate;
+        }
+
+        await get_query(main_query, req, res, next, 'tab_issues');
+    } else {
+        await get('*, false as follow', 'tab_issues_view', predicate, req, res, next, 'tab_issues', false);
+    }
 
 };
 
@@ -631,6 +656,9 @@ const follow = async function (req, res, next) {
                         WHERE number=${number} AND user_id=${req.user_id} AND repo='${repo}' AND organisation='${organisation}';`;
                     await pool.query(query);
                 }
+                res.status(200).send("success");
+            } else {
+                res.status(401).send("Invalid params");
             }
         } else {
             res.status(400).send("Invalid token, please login");
@@ -678,7 +706,15 @@ const tab_watchlist = async function (req, res, next) {
         
                 predicate += `title ~* '${req.query.search}' `;
             }
-        
+
+            if (!predicate) {
+                predicate = 'WHERE ';
+            } else {
+                predicate += 'AND ';
+            }
+
+            predicate += `user_id = ${req?.user_id} `;
+
             if (sortBy && sortType) {
                 predicate += `ORDER BY ${sortBy} ${sortType}`;
             }
