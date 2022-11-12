@@ -503,6 +503,8 @@ const tab_releases = async function (req, res, next) {
     let sortType = req?.query?.sortType;
     let status = req?.query?.status;
 
+    console.log(req.query);
+
     const sortColumns = ['updated_at'];
     const sortMode = ['asc', 'desc'];
     const statusValues = ['Draft', 'Pre-release', 'Released', 'Latest'];
@@ -684,9 +686,11 @@ const tab_watchlist = async function (req, res, next) {
             let status = req?.query?.status;
             let is_pr = req?.query?.is_pr;
         
-            const sortColumns = ['updated_at'];
+            const sortColumns = ['updated_at', 'comments'];
             const sortMode = ['asc', 'desc'];
             const statusValues = ['open', 'closed'];
+
+            console.log(req.query);
         
             if (!sortBy || !sortColumns.includes(sortBy)) {
                 sortBy = 'updated_at';
