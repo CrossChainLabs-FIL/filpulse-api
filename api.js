@@ -279,12 +279,14 @@ const tab_prs = async function (req, res, next) {
     let sortType = req?.query?.sortType;
     let status = req?.query?.status;
 
+    console.log(req.query);
+
     const sortColumns = ['updated_at'];
     const sortMode = ['asc', 'desc'];
     const statusValues = ['merged', 'open', 'closed'];
 
     if (!sortBy || !sortColumns.includes(sortBy)) {
-        sortBy = 'updated_at';
+        sortBy = 'tab_prs_view.updated_at';
     }
 
     if (!sortType || !sortMode.includes(sortType)) {
@@ -292,22 +294,22 @@ const tab_prs = async function (req, res, next) {
     }
 
     if (repo && organisation) {
-        predicate = `WHERE repo = '${repo}' AND organisation = '${organisation}'`;
+        predicate = `WHERE tab_prs_view.repo = '${repo}' AND tab_prs_view.organisation = '${organisation}'`;
     }
 
     if (contributor) {
         if (!predicate) {
-            predicate = `WHERE dev_name = '${contributor}' `;
+            predicate = `WHERE tab_prs_view.dev_name = '${contributor}' `;
         } else {
-            predicate += `AND dev_name = '${contributor}' `;
+            predicate += `AND tab_prs_view.dev_name = '${contributor}' `;
         }
     }
 
     if (status || statusValues.includes(status)) {
         if (!predicate) {
-            predicate = `WHERE state = '${status}' `;
+            predicate = `WHERE tab_prs_view.state = '${status}' `;
         } else {
-            predicate += `AND state = '${status}' `;
+            predicate += `AND tab_prs_view.state = '${status}' `;
         }
     }
 
@@ -318,7 +320,7 @@ const tab_prs = async function (req, res, next) {
             predicate += 'AND ';
         }
 
-        predicate += `title ~* '${req.query.search}' `;
+        predicate += `tab_prs_view.title ~* '${req.query.search}' `;
     }
 
     if (sortBy && sortType) {
@@ -386,12 +388,8 @@ const tab_issues = async function (req, res, next) {
     const sortMode = ['asc', 'desc'];
     const statusValues = ['open', 'closed'];
 
-    if (req.authenticated) {
-        console.log('tab_issues', 'user_id', req.user_id)
-    }
-
     if (!sortBy || !sortColumns.includes(sortBy)) {
-        sortBy = 'updated_at';
+        sortBy = 'tab_issues_view.updated_at';
     }
 
     if (!sortType || !sortMode.includes(sortType)) {
@@ -399,30 +397,30 @@ const tab_issues = async function (req, res, next) {
     }
 
     if (repo && organisation) {
-        predicate = `WHERE repo = '${repo}' AND organisation = '${organisation}'`;
+        predicate = `WHERE tab_issues_view.repo = '${repo}' AND tab_issues_view.organisation = '${organisation}'`;
     }
 
     if (assignee) {
         if (!predicate) {
-            predicate = `WHERE assignees ~* '${assignee}' `;
+            predicate = `WHERE tab_issues_view.assignees ~* '${assignee}' `;
         } else {
-            predicate += `AND assignees ~* '${assignee}' `;
+            predicate += `AND tab_issues_view.assignees ~* '${assignee}' `;
         }
     }
 
     if (contributor) {
         if (!predicate) {
-            predicate = `WHERE dev_name = '${contributor}' `;
+            predicate = `WHERE tab_issues_view.dev_name = '${contributor}' `;
         } else {
-            predicate += `AND dev_name = '${contributor}' `;
+            predicate += `AND tab_issues_view.dev_name = '${contributor}' `;
         }
     }
 
     if (status || statusValues.includes(status)) {
         if (!predicate) {
-            predicate = `WHERE state = '${status}' `;
+            predicate = `WHERE tab_issues_view.state = '${status}' `;
         } else {
-            predicate += `AND state = '${status}' `;
+            predicate += `AND tab_issues_view.state = '${status}' `;
         }
     }
 
@@ -433,7 +431,7 @@ const tab_issues = async function (req, res, next) {
             predicate += 'AND ';
         }
 
-        predicate += `title ~* '${req.query.search}' `;
+        predicate += `tab_issues_view.title ~* '${req.query.search}' `;
     }
 
     if (sortBy && sortType) {
