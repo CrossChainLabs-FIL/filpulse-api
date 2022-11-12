@@ -682,6 +682,7 @@ const tab_watchlist = async function (req, res, next) {
             let sortBy = req?.query?.sortBy;
             let sortType = req?.query?.sortType;
             let status = req?.query?.status;
+            let is_pr = req?.query?.is_pr;
         
             const sortColumns = ['updated_at'];
             const sortMode = ['asc', 'desc'];
@@ -695,11 +696,11 @@ const tab_watchlist = async function (req, res, next) {
                 sortType = 'desc';
             }
         
-            if (status || statusValues.includes(status)) {
+            if (status || statusValues.includes(status)  && is_pr != undefined) {
                 if (!predicate) {
-                    predicate = `WHERE state = '${status}' `;
+                    predicate = `WHERE state = '${status}' AND is_pr = '${is_pr}' `;
                 } else {
-                    predicate += `AND state = '${status}' `;
+                    predicate += `AND state = '${status}' AND is_pr = '${is_pr}' `;
                 }
             }
         
