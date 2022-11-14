@@ -145,7 +145,7 @@ const tab_commits = async function (req, res, next) {
     let sortBy = req?.query?.sortBy;
     let sortType = req?.query?.sortType;
 
-    const sortColumns = ['commit_date'];
+    const sortColumns = ['commit_date', 'commit_hash', 'message'];
     const sortMode = ['asc', 'desc'];
 
     if (!sortBy || !sortColumns.includes(sortBy)) {
@@ -281,7 +281,7 @@ const tab_prs = async function (req, res, next) {
 
     console.log(req.query);
 
-    const sortColumns = ['updated_at'];
+    const sortColumns = ['updated_at', 'number', 'title'];
     const sortMode = ['asc', 'desc'];
     const statusValues = ['merged', 'open', 'closed'];
 
@@ -384,7 +384,7 @@ const tab_issues = async function (req, res, next) {
     let sortType = req?.query?.sortType;
     let status = req?.query?.status;
 
-    const sortColumns = ['updated_at'];
+    const sortColumns = ['updated_at', 'number', 'title'];
     const sortMode = ['asc', 'desc'];
     const statusValues = ['open', 'closed'];
 
@@ -505,7 +505,7 @@ const tab_releases = async function (req, res, next) {
 
     console.log(req.query);
 
-    const sortColumns = ['updated_at'];
+    const sortColumns = ['updated_at', 'id', 'name'];
     const sortMode = ['asc', 'desc'];
     const statusValues = ['Draft', 'Pre-release', 'Released', 'Latest'];
 
@@ -686,7 +686,7 @@ const tab_watchlist = async function (req, res, next) {
             let status = req?.query?.status;
             let is_pr = req?.query?.is_pr;
         
-            const sortColumns = ['updated_at', 'comments'];
+            const sortColumns = ['updated_at', 'comments', 'number', 'title'];
             const sortMode = ['asc', 'desc'];
             const statusValues = ['open', 'closed'];
 
