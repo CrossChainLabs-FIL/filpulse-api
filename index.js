@@ -25,6 +25,7 @@ const {
     authenticate,
     follow,
     tab_watchlist,
+    filter_participants,
 } = require('./api');
 
 var express = require("express");
@@ -64,7 +65,7 @@ app.get("/tab_releases/filter/contributor", tab_releases_filter_contributor);
 app.post("/authenticate", authenticate);
 app.post("/follow", validateToken, follow);
 app.post("/tab_watchlist", validateToken, tab_watchlist);
-
+app.post("/tab_watchlist/filter/participants", validateToken, filter_participants);
 app.post("/tab_issues", validateToken, tab_issues);
 app.post("/tab_prs", validateToken, tab_prs);
 

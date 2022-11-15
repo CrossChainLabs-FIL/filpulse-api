@@ -718,6 +718,16 @@ const tab_watchlist = async function (req, res, next) {
                 predicate += `title ~* '${req.query.search}' `;
             }
 
+            if (req?.query?.participant) {
+                if (!predicate) {
+                    predicate = 'WHERE ';
+                } else {
+                    predicate += 'AND ';
+                }
+        
+                predicate += `participants ~* '${req.query.participant}' `;
+            }
+
             if (!predicate) {
                 predicate = 'WHERE ';
             } else {
@@ -731,6 +741,23 @@ const tab_watchlist = async function (req, res, next) {
             }
         
             await get('*', 'tab_watchlist_view', predicate, req, res, next, 'tab_watchlist', false);
+        } else {
+            res.status(400).send("Invalid token, please login");
+        }
+    } catch (err) {
+        res.status(400).send("Unable to authenticate user");
+        ERROR(`POST[/tab_watchlist] error:${err}`);
+    }
+};
+
+const filter_participants = async function (req, res, next) {
+    try {
+        if (req.authenticated) {
+            if (req?.query?.search) {
+                await get('dev_name, avatar_url', 'participants_view', `WHERE dev_name ~* '${req.query.search}' AND user_id = ${req?.user_id}`, req, res, next, 'tab_contributors_filter_project');
+            } else {
+                await get('dev_name, avatar_url', 'participants_view', `WHERE user_id = ${req?.user_id}`, req, res, next, 'tab_contributors_filter_project');
+            }
         } else {
             res.status(400).send("Invalid token, please login");
         }
@@ -764,4 +791,5 @@ module.exports = {
     authenticate,
     follow,
     tab_watchlist,
+    filter_participants,
 }
