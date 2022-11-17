@@ -40,7 +40,7 @@ const get = async function (query, view, predicate, req, res, next, log, single_
                     offset = parseInt(req?.query?.offset);
                 }
 
-                let list = await pool.query(main_query + ` OFFSET ${offset} LIMIT 100;`);
+                let list = await pool.query(main_query + ` OFFSET ${offset} LIMIT ${config.api.limit};`);
                 result = {
                     list: list?.rows,
                     total: count.rows[0].count,
@@ -98,7 +98,7 @@ const get_query = async function (query, req, res, next, log) {
                 offset = parseInt(req?.query?.offset);
             }
 
-            let list = await pool.query(main_query + ` OFFSET ${offset} LIMIT 100;`);
+            let list = await pool.query(main_query + ` OFFSET ${offset} LIMIT ${config.api.limit};`);
             result = {
                 list: list?.rows,
                 total: count.rows[0].count,
@@ -664,7 +664,7 @@ const follow = async function (req, res, next) {
                     await pool.query(query);
                 }
                 INFO(`POST[follow] user_id: ${req.user_id}, ${JSON.stringify(req.query)} succesful`);
-                res.status(200).send("success");
+                res.json({ success: true });
             } else {
                 res.status(401).send("Invalid params");
             }
@@ -673,7 +673,38 @@ const follow = async function (req, res, next) {
         }
     } catch (err) {
         res.status(400).send("Unable to authenticate user");
-        ERROR(`POST[/authenticate] error:${err}`);
+        ERROR(`POST[/follow] error:${err}`);
+    }
+};
+
+const view_comments = async function (req, res, next) {
+    try {
+        if (req.authenticated) {
+            const { number, repo, organisation } = req.query;
+
+            INFO(`POST[view_comments] user_id: ${req.user_id}, ${JSON.stringify(req.query)}`);
+
+            if (number && repo && organisation && req.user_id) {
+                let query = `
+                            UPDATE watchlist SET viewed_at = now()
+                            WHERE number=${number} 
+                            AND user_id=${req.user_id} 
+                            AND repo='${repo}' 
+                            AND organisation='${organisation}';`;
+
+                await pool.query(query);
+
+                INFO(`POST[view_comments] user_id: ${req.user_id}, ${JSON.stringify(req.query)} succesful`);
+                res.json({ success: true });
+            } else {
+                res.status(401).send("Invalid params");
+            }
+        } else {
+            res.status(400).send("Invalid token, please login");
+        }
+    } catch (err) {
+        res.status(400).send("Unable to authenticate user");
+        ERROR(`POST[/view_comments] error:${err}`);
     }
 };
 
@@ -792,4 +823,5 @@ module.exports = {
     follow,
     tab_watchlist,
     filter_participants,
+    view_comments,
 }

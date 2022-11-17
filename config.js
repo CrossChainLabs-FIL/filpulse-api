@@ -2,6 +2,7 @@ module.exports = {
   api: {
     port: process.env.PORT || 3000,
     token_key: process.env.TOKEN_KEY || '',
+    limit: process.env.LIMIT || 20,
   },
   database: {
     user: process.env.DB_USER || '',
