@@ -12,7 +12,7 @@ function error_response(code, msg, res) {
 }
 
 // GET
-const get = async function (query, view, predicate, req, res, next, log, single_line) {
+const get = async function (query, view, predicate, req, res, next, log, single_line, limit = true) {
     try {
         var result = undefined;
         let count_query;
@@ -40,7 +40,13 @@ const get = async function (query, view, predicate, req, res, next, log, single_
                     offset = parseInt(req?.query?.offset);
                 }
 
-                let list = await pool.query(main_query + ` OFFSET ${offset} LIMIT ${config.api.limit};`);
+                let list;
+                if (limit) {
+                    list = await pool.query(main_query + ` OFFSET ${offset} LIMIT ${config.api.limit};`);
+                } else {
+                    list = await pool.query(main_query + ` ;`);
+                }
+                
                 result = {
                     list: list?.rows,
                     total: count.rows[0].count,
@@ -130,11 +136,11 @@ const top_contributors = async function (req, res, next) {
 };
 
 const commits = async function (req, res, next) {
-    await  get('*', 'commits_view', 'ORDER BY commit_month', req, res, next, 'commits', false);
+    await  get('*', 'commits_view', 'ORDER BY commit_month', req, res, next, 'commits', false, false);
 };
 
 const active_contributors = async function (req, res, next) {
-    await  get('*', 'active_contributors_view', 'ORDER BY month', req, res, next, 'active_contributors', false);
+    await  get('*', 'active_contributors_view', 'ORDER BY month', req, res, next, 'active_contributors', false, false);
 };
 
 const tab_commits = async function (req, res, next) {
